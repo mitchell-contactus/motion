@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Motion</title>
+  </head>
+  <body>
+  	<div class="container">
+  		<div class="row">
+  			<div class="col-4">
+  				<form>
+  					<div class="form-group">
+  						<label for="username">Username</label>
+  						<input class="form-control" id="username" placeholder="Enter Username" />
+  					</div>
+  					<div class="form-group">
+  						<label for="password">Password</label>
+  						<input type="password" class="form-control" id="password" placeholder="Enter Password" />
+  					</div>
+            <div id="account-div" class="form-group" hidden>
+              <label for="account">Account</label>
+              <select class="custom-select" id="account"></select>
+            </div>
+  				</form>
+          <div id="error-box" class="alert alert-danger" role="alert" hidden>
+            Login not authorized
+          </div>
+          <button id="login-button" class="btn btn-primary">Log-in</button>
+  			</div>
+  		</div>
+  	</div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="/js/cookie.js"></script>
+    <script src="/js/session.js"></script>
+
+    <script>
+    $(document).ready(function() {
+
+      var session = new Session();
+
+      $('#login-button').click(function() {
+        var accountId = $('#account').val();
+        if (accountId == null) {
+          listAccountsForUser($('#username').val(), $('#password').val());
+        } else {
+          session.createSession($('#username').val(), $('#password').val(), accountId);
+        }
+      });
+    });
+
+    function listAccountsForUser(username, password) {
+      $('#account').empty();
+      $('#error-box:not([hidden])').prop('hidden', true);
+      $.ajax({
+        url: '/api/auth/listAccountsForUser',
+        type: 'POST',
+        data: {
+          username: username,
+          password: password
+        },
+        success: function(data) {
+          for (accountId in data) {
+            $('#account').append('<option value="' + accountId + '">' + data[accountId] + '</option>')
+            $("#account-div").removeAttr("hidden");
+          }
+        },
+        error: function(xhr, status, error) {
+          $('#account-div:not([hidden])').prop('hidden', true);
+          $("#error-box").removeAttr("hidden");
+        }
+      });
+    }
+    </script>
+  </body>
+</html>
