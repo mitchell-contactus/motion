@@ -58,9 +58,15 @@
     <Compile Include="Rest\InputException.cs" />
     <Compile Include="Sessions\SessionData.cs" />
     <Compile Include="Sessions\Session.cs" />
-    <Compile Include="Tickets\TicketFilter.cs" />
-    <Compile Include="Tickets\FormPermissions.cs" />
+    <Compile Include="Tickets\Permissions.cs" />
+    <Compile Include="Tickets\TicketEvent.cs" />
+    <Compile Include="Forms\FormData.cs" />
+    <Compile Include="Forms\TicketFilter.cs" />
+    <Compile Include="Forms\FormPermissions.cs" />
+    <Compile Include="Forms\FormTicket.cs" />
     <Compile Include="Tickets\Ticket.cs" />
+    <Compile Include="Comments\CommentData.cs" />
+    <Compile Include="Comments\Comment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -73,6 +79,8 @@
     <Folder Include="Users\" />
     <Folder Include="Rest\" />
     <Folder Include="Sessions\" />
+    <Folder Include="Forms\" />
+    <Folder Include="Comments\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

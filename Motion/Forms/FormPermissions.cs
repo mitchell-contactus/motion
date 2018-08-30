@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Motion.Tickets
+namespace Motion.Forms
 {
     public class FormPermissions
     {

@@ -1,272 +1,172 @@
 ﻿using System;
 using System.Collections.Generic;
+using Motion.Comments;
 using Motion.Database;
+using Motion.Forms;
 using Motion.Sessions;
 
 namespace Motion.Tickets
 {
     public class TicketData : DataBase
     {
-        const string ListTicketsQuery =
+        readonly FormData formData = new FormData();
+        readonly CommentData commentData = new CommentData();
+
+        const string GetTicketQuery = 
         @"SELECT
-        tt_tickets.id,
-        (CONVERT_TZ((tt_tickets.created_at), 'UTC','{4}')) as created_at,
-        status,
-        subject,
+        tickets.id,
+        (CONVERT_TZ( (created_at), 'UTC','{3}')) as created_at,
+        (CONVERT_TZ( (closed_at), 'UTC','{3}')) as closed_at,
+        (CONVERT_TZ( (due_at), 'UTC','{3}')) as due_at,
+        due_at as due_at_utc, 
+        first_touch_at, 
+        status, 
         opened_by,
+        opened.username,
+        opened.name,
         closed_by,
-        (CONVERT_TZ( (due_at), 'UTC','{4}')) as due_at,
-        UNIX_TIMESTAMP(due_at) * 1000 as due_at_utc,
-        UNIX_TIMESTAMP(now()) * 1000 as now_utc,
-        ala.name,
-        aca.first_name as contact_first_name,
-        aca.last_name as contact_last_name,
-        alb.name as assigned_name,
-        acb.first_name as assigned_first_name,
-        acb.last_name as assigned_last_name,
-        tt_ticket_forms.name as form_name,
-        tt_tickets.form_id as form_id,
-        tt_tickets.priority as priority,
-        (CONVERT_TZ( (tt_tickets.updated_at), 'UTC','{4}')) as updated_at,
-        tt_tickets.locked_by as locked_by,
-        (CONVERT_TZ( (tt_tickets.locked_until), 'UTC','{4}')) as locked_until
+        closed.username,
+        closed.name,
+        subject, 
+        tickets.account_id, 
+        form_id,
+        forms.name,
+        (CONVERT_TZ( (updated_at), 'UTC','{3}')) as updated_at,
+        assigned_to, 
+        client_guid, 
+        contact_id,
+        contact.username,
+        contact.name,
+        reason_id, 
+        parent_id, 
+        priority, 
+        locked_by, 
+        source_type
         FROM
-        {0}.tt_tickets
-        LEFT JOIN 
-        {0}.auth_local ala 
-        ON 
-        ala.id=tt_tickets.opened_by
-        LEFT JOIN 
-        {0}.tt_contacts aca 
-        ON 
-        aca.id=tt_tickets.opened_by
-        LEFT JOIN 
-        {0}.auth_local alb 
-        ON 
-        alb.id=tt_tickets.assigned_to
-        LEFT JOIN 
-        {0}.tt_contacts acb 
-        ON
-        acb.id=tt_tickets.assigned_to
-        LEFT JOIN 
-        {0}.tt_ticket_forms 
-        ON 
-        tt_ticket_forms.id=tt_tickets.form_id
-        WHERE
-        tt_tickets.account_id = {1}
-        AND
-        (
-            tt_tickets.form_id IN ({3})
-            OR 
-            assigned_to = {2}
-        )";
-        public List<Ticket> ListTickets(Session session, TicketFilter filter) {
-
-            string query = ListTicketsQuery;
-            foreach (var f in filter.GetFilters())
-            {
-                query += " AND " + f;
-            }
-            query += "ORDER BY tt_tickets.id desc";
-
-            var permissions = GetFormPermissions(session);
-            List<string> formIds = new List<string>();
-            foreach (var formId in permissions.Keys)
-            {
-                if(permissions[formId].CanView)
-                {
-                    formIds.Add(formId.ToString());
-                }
-            }
-
-            List<Ticket> tickets = new List<Ticket>();
-            using (var select = Select(query, 
-                                       Config.Get("mysql_db"), 
-                                       session.AccountId, 
-                                       session.UserId,
-                                       String.Join(",", formIds),
-                                       "EST"))
-                while (select.Read())
-            {
-                tickets.Add(new Ticket(select.GetInt32(0))
-                {
-                    CreatedDate = select.IsDBNull(1) ? null : select.GetString(1),
-                    Status = select.IsDBNull(2) ? 0 : select.GetInt32(2),
-                    Subject = select.IsDBNull(3) ? null : select.GetString(3),
-                    OpenedById = select.IsDBNull(4) ? null : new int?(select.GetInt32(4)),
-                    ClosedById = select.IsDBNull(5) ? null : new int?(select.GetInt32(5)),
-                    DueDate = select.IsDBNull(6) ? null : select.GetString(6),
-                    OpenedByName = select.IsDBNull(9) ? null : select.GetString(9),
-                    ContactFirstName = select.IsDBNull(10) ? null : select.GetString(10),
-                    ContactLastName = select.IsDBNull(11) ? null : select.GetString(11),
-                    AssignedName = select.IsDBNull(12) ? null : select.GetString(12),
-                    AssignedFirstName = select.IsDBNull(13) ? null : select.GetString(13),
-                    AssignedLastName = select.IsDBNull(14) ? null : select.GetString(14),
-                    FormName = select.IsDBNull(15) ? null : select.GetString(15),
-                    FormId = select.IsDBNull(16) ? 0 : select.GetInt32(16),
-                    Priority = select.IsDBNull(17) ? null : new int?(select.GetInt32(17)),
-                    UpdatedDate = select.IsDBNull(18) ? null : select.GetString(18)
-                });
-            }
-            return tickets;
-        }
-
-        const string GetFormPermissionsQuery =
-        @"SELECT
-        forms.id,
-        perm.can_view,
-        perm.can_edit,
-        perm.can_view_internal_comments,
-        perm.can_delete
-        FROM
-        {0}.tt_ticket_forms forms
+        {0}.tt_tickets tickets
         LEFT JOIN
-        (
-            SELECT 
-            form_id,
-            max(can_view) as can_view,
-            max(can_edit) as can_edit,
-            max(can_view_internal_comments) as can_view_internal_comments,
-            max(can_delete) as can_delete, 
-            max(can_see_others_todo_items) as can_see_others_todo_items 
-            FROM 
-            {0}.tt_ticket_role_permissions 
-            WHERE 
-            tt_ticket_role_permissions.account_id = {1}
-            AND 
-            (
-                tt_ticket_role_permissions.role_id IN
-                (
-                    SELECT 
-                    account_role_id 
-                    FROM 
-                    {0}.account_roles_ad_group 
-                    WHERE 
-                    account_id = {1} 
-                    AND 
-                    ad_group_name IN
-                    (
-                        SELECT 
-                        name 
-                        FROM 
-                        {0}.auth_user_ad_groups_cache 
-                        WHERE 
-                        user_id = {2}
-                    )
-                    UNION 
-                    SELECT 
-                    role_id 
-                    FROM 
-                    {0}.account_role_users 
-                    WHERE 
-                    account_id = {1}
-                    AND 
-                    user_id = {2}
-                )
-                OR
-                tt_ticket_role_permissions.role_id = -1
-            )
-            GROUP BY 
-            form_id
-        ) perm
+        {0}.auth_local opened
         ON
-        forms.id = perm.form_id
-        ORDER BY
-        forms.id";
-        public Dictionary<int, FormPermissions> GetFormPermissions(Session session) {
-            var defaultPermissions = GetPermissionsForForm(session, -1);
-
-            Dictionary<int, FormPermissions> permissions = new Dictionary<int, FormPermissions>();
-            using (var select = Select(GetFormPermissionsQuery, Config.Get("mysql_db"), session.AccountId, session.UserId))
-                while(select.Read())
-            {
-                permissions.Add(select.GetInt32(0), new FormPermissions()
-                {
-                    CanView = select.IsDBNull(1) ? defaultPermissions.CanView : select.GetBoolean(1),
-                    CanEdit = select.IsDBNull(2) ? defaultPermissions.CanEdit : select.GetBoolean(2),
-                    CanViewInternalComments = select.IsDBNull(3) ? defaultPermissions.CanViewInternalComments : select.GetBoolean(3),
-                    CanDelete = select.IsDBNull(4) ? defaultPermissions.CanDelete : select.GetBoolean(4)
-                });
-            }
-            return permissions;
-        }
-
-        const string GetPermissionsForFormQuery =
-        @"SELECT 
-        max(can_view) as can_view,
-        max(can_edit) as can_edit,
-        max(can_view_internal_comments) as can_view_internal_comments,
-        max(can_delete) as can_delete, 
-        max(can_see_others_todo_items) as can_see_others_todo_items 
-        FROM 
-        {0}.tt_ticket_role_permissions 
-        WHERE 
-        tt_ticket_role_permissions.account_id = {1}
+        opened_by = opened.id
+        LEFT JOIN
+        {0}.auth_local closed
+        ON
+        closed_by = closed.id
+        LEFT JOIN
+        {0}.auth_local contact
+        ON
+        contact_id = contact.id
+        LEFT JOIN
+        {0}.tt_ticket_forms forms
+        ON
+        form_id = forms.id
+        WHERE
+        tickets.id = {2}
         AND
-        tt_ticket_role_permissions.form_id = {3}
-        AND 
-        (
-            tt_ticket_role_permissions.role_id IN
-            (
-                SELECT 
-                account_role_id 
-                FROM 
-                {0}.account_roles_ad_group 
-                WHERE 
-                account_id = {1} 
-                AND 
-                ad_group_name IN
-                (
-                    SELECT 
-                    name 
-                    FROM 
-                    {0}.auth_user_ad_groups_cache 
-                    WHERE 
-                    user_id = {2}
-                )
-                UNION 
-                SELECT 
-                role_id 
-                FROM 
-                {0}.account_role_users 
-                WHERE 
-                account_id = {1}
-                AND 
-                user_id = {2}
-            )
-            OR
-            tt_ticket_role_permissions.role_id = -1
-        )";
-        public FormPermissions GetPermissionsForForm(Session session, int formId)
+        tickets.account_id = {1}";
+        public Ticket GetTicket(Session session, int ticketId)
         {
-            using (var select = Select(GetPermissionsForFormQuery, 
-                                       Config.Get("mysql_db"), session.AccountId, session.UserId, formId))
+            Ticket ticket = null;
+            using (var select = Select(GetTicketQuery, Config.Get("mysql_db"), session.AccountId, ticketId, "EST"))
             {
                 if (select.Read())
                 {
-                    return new FormPermissions()
+                    ticket = new Ticket(select.GetInt32(0))
                     {
-                        CanView = select.GetBoolean(0),
-                        CanEdit = select.GetBoolean(1),
-                        CanViewInternalComments = select.GetBoolean(2),
-                        CanDelete = select.GetBoolean(3)
+                        CreatedDate = select.IsDBNull(1) ? null : select.GetString(1),
+                        ClosedDate = select.IsDBNull(2) ? null : select.GetString(2),
+                        DueDate = select.IsDBNull(3) ? null : select.GetString(3),
+
+                        FirstTouchDate = select.IsDBNull(5) ? null : select.GetString(5),
+                        Status = select.GetInt32(6),
+                        OpenedById = select.IsDBNull(7) ? null : new int?(select.GetInt32(7)),
+                        OpenedByUsername = select.IsDBNull(8) ? null : select.GetString(8),
+                        OpenedByName = select.IsDBNull(9) ? null : select.GetString(9),
+                        ClosedById = select.IsDBNull(10) ? null : new int?(select.GetInt32(10)),
+                        ClosedByUsername = select.IsDBNull(11) ? null : select.GetString(11),
+                        ClosedByName = select.IsDBNull(12) ? null : select.GetString(12),
+                        Subject = select.IsDBNull(13) ? null : select.GetString(13),
+                        AccountId = select.GetInt32(14),
+                        FormId = select.GetInt32(15),
+                        FormName = select.IsDBNull(16) ? null : select.GetString(16),
+                        UpdatedDate = select.IsDBNull(17) ? null : select.GetString(17),
+                        AssignedId = select.IsDBNull(18) ? null : new int?(select.GetInt32(18)),
+                        ClientGuid = select.IsDBNull(19) ? null : select.GetString(19),
+                        ContactId = select.IsDBNull(20) ? null : new int?(select.GetInt32(20)),
+                        ContactUsername = select.IsDBNull(21) ? null : select.GetString(21),
+                        ContactName = select.IsDBNull(22) ? null : select.GetString(22),
+                        ReasonId = select.IsDBNull(23) ? null : new int?(select.GetInt32(23)),
+                        ParentId = select.IsDBNull(24) ? null : new int?(select.GetInt32(24)),
+                        Priority = select.IsDBNull(25) ? null : new int?(select.GetInt32(25)),
+                        LockedById = select.IsDBNull(26) ? null : new int?(select.GetInt32(26)),
+                        SourceType = select.IsDBNull(27) ? null : select.GetString(27)
                     };
                 }
             }
-            // If the form is not the default form
-            if (formId != -1)
+            if (ticket == null)
             {
-                // Return default permissions
-                return GetPermissionsForForm(session, -1);
+                return null;
             }
-            // Super default permissions are all false
-            return new FormPermissions()
+
+            ticket.History = GetTicketHistory(session, ticketId);
+            ticket.Comments = commentData.GetCommentsForTicket(session, ticketId);
+
+            ticket.Permissions = new TicketPermissions(formData.GetPermissionsForForm(session, ticket.FormId));
+            if (ticket.AssignedId == session.UserId)
             {
-                CanView = false,
-                CanEdit = false,
-                CanViewInternalComments = false,
-                CanDelete = false
-            };
+                ticket.Permissions.CanView = true;
+                ticket.Permissions.CanComment = true;
+            }
+            foreach (var e in ticket.History) {
+                if (e.UserId == session.UserId)
+                {
+                    ticket.Permissions.CanView = true;
+                    ticket.Permissions.CanComment = true;
+                    break;
+                }
+            }
+
+            return ticket;
         }
-    }
+
+        const string GetTicketHistoryQuery =
+        @"SELECT
+        event_by,
+        name,
+        username,
+        event_type,
+        (CONVERT_TZ( (event_at), 'UTC','EST')) as event_at
+        FROM
+        {0}.tt_ticket_history history
+        LEFT JOIN
+        {0}.auth_local auth
+        ON
+        history.event_by = auth.id
+        WHERE
+        ticket_id = {2}
+        AND
+        account_id = {1}
+        ORDER BY
+        history.id";
+        /// <summary>
+        ///  Does not check if the session has view priviledges on the ticket
+        /// </summary>
+        public List<TicketEvent> GetTicketHistory(Session session, int ticketId)
+        {
+            List<TicketEvent> history = new List<TicketEvent>();
+            using (var select = Select(GetTicketHistoryQuery, Config.Get("mysql_db"), session.AccountId, ticketId))
+                while(select.Read())
+            {
+                history.Add(new TicketEvent()
+                {
+                    UserId = select.GetInt32(0),
+                    Name = select.IsDBNull(1) ? null : select.GetString(1),
+                    Username = select.GetString(2),
+                    EventType = select.GetInt32(3),
+                    Timestamp = select.GetString(4)
+                });
+            }
+            return history;
+        }
+    } 
 }

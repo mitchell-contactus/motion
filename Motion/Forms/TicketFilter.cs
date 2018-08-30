@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using Motion.Database;
 
-namespace Motion.Tickets
+namespace Motion.Forms
 {
     public class TicketFilter
     {
