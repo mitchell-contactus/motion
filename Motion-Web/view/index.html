@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="/css/collapse-fix.css" rel="stylesheet">
+
+    <title>Motion</title>
+  </head>
+  <body class="bg-secondary">
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+      <span class="navbar-brand h1">Motion</span>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto"></ul>
+        <span class="text-light mr-4">User Name</span>
+        <a class="text-light" href="/" id="logout"><i class="fa fa-sign-out"></i> Log Out</a>
+      </div>
+    </nav>
+  	<div class="container-fluid ">
+      <div class="row d-flex d-md-block flex-nowrap">
+        <div class="col-md-1 float-left col-1 bg-secondary collapse width show" id="sidebar">
+          <nav class="nav flex-column">
+            <a class="nav-link text-light" href="/">Home</a>
+            <a class="nav-link text-light" href="/list">List</a>
+            <a class="nav-link text-light" href="#">Create Case</a>
+          </nav>
+        </div>
+        <div class="col-md-9 float-left bg-white">
+          <div class="row">
+            <div class="col">
+              <button class="navbar-light navbar-toggler" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="true" aria-label="Toggle sidebar">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+            </div>
+          </div>
+          <div class="row pl-3">
+            <div class="col">
+              <!-- Begin main page content -->
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col">
+                    <h1>Case <entry id="ticketId"></entry>: <entry id="subject"></entry></h1>
+                  </div>
+                </div>
+                <div class="row mb-4">
+                  <div class="col">
+                    <ul class="list-group">
+                      <li class="list-group-item">Queue: <entry id="form"></entry></li>
+                      <li class="list-group-item">Created By: <entry id="createdBy"></entry></li>
+                      <li class="list-group-item">Messages: <entry id="messageCount"></entry></li>
+                      <li class="list-group-item">Priority: <entry id="priority"></entry></li>
+                      <li class="list-group-item">Source: <entry id="source"></entry></li>
+                      <li class="list-group-item">Contact: <entry id="contact"></entry></li>
+                    </ul>
+                  </div>
+                  <div class="col">
+                    <ul class="list-group">
+                      <li class="list-group-item">Status: <entry id="status"></entry></li>
+                      <li class="list-group-item">Last Updated: <entry id="updated"></entry></li>
+                      <li class="list-group-item">Created: <entry id="created"></entry></li>
+                      <li class="list-group-item">Assigned To: <entry id="assigned"></entry></li>
+                      <li class="list-group-item">Due: <entry id="due"></entry></li>
+                      <li class="list-group-item">Participants: <entry id="participants"></entry></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <div id="ticket-body" class="card">
+                      <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs">
+                          <li class="nav-item"><a id="comment-toggle" class="nav-link active" href="#comments">Comments</a></li>
+                          <li class="nav-item"><a id="history-toggle" class="nav-link" href="#history">History</a></li>
+                        </ul>
+                      </div>
+                      <div id="comments" class="card-body">
+                      </div>
+                      <div id="history" class="card-body" hidden>
+                        <ul>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- End main page content -->
+            </div>
+          </div>
+        </div>
+  	</div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="/js/cookie.js"></script>
+    <script src="/js/session.js"></script>
+    <script src="/js/utils.js"></script>
+
+    <script>
+    $(document).ready(function() {
+      var session = new Session();
+      if (session.session == undefined) {
+        document.location = "/login";
+        return;
+      }
+
+      $('#logout').click(function() {
+        session.clearSession();
+      });
+
+      $('#comment-toggle').click(function() {
+        $('#ticket-body ul .active').removeClass('active');
+        $('#comment-toggle').addClass('active');
+        $('#ticket-body > .card-body:not([hidden])').prop('hidden', true);
+        $('#comments').prop('hidden', false);
+      });
+
+      $('#history-toggle').click(function() {
+        $('#ticket-body ul .active').removeClass('active');
+        $('#history-toggle').addClass('active');
+        $('#ticket-body > .card-body:not([hidden])').prop('hidden', true);
+        $('#history').prop('hidden', false);
+      });
+
+      var ticketId = getJsonFromUrl()['ticketId'];
+      loadTicket(ticketId);
+
+      function loadTicket(ticketId) {
+        $.ajax({
+          url: '/api/tickets/view',
+          type: 'POST',
+          data: {
+            session: session.session,
+            ticketId: ticketId
+          },
+          success: function(ticket) {
+            $('#ticketId').text(ticket.ID);
+            $('#subject').text(ticket.Subject);
+            $('#form').text(ticket.FormName);
+            $('#createdBy').text(ticket.OpenedByName);
+            $('#messageCount').text(ticket.Comments.length);
+            $('#priority').text(ticket.Priority == null ? "--" : ticket.Priority);
+            $('#source').text(ticket.SourceType);
+            $('#contact').text(ticket.ContactName == null ? "No Contact Selected" : ticket.ContactName);
+            $('#status').text(ticket.Status);
+            $('#updated').text(ticket.UpdatedDate);
+            $('#created').text(ticket.CreatedDate);
+            $('#assigned').text(ticket.AssignedName == null ? "No One" : ticket.AssignedName);
+            $('#due').text(ticket.DueDate == null ? "Not Assigned" : ticket.DueDate);
+
+            $.each(ticket.Comments, function(i, comment) {
+              buildComment(comment);
+            });
+            $.each(ticket.History, function(i, event) {
+              buildEvent(event);
+            });
+          }
+        });
+      }
+
+      function buildComment(comment) {
+        var card = '<div class="card mb-2">';
+        card += '<div class="card-header">';
+        card += '<h5>' + comment.UserName + '</h5>';
+        card += comment.CreatedDate;
+        card += '</div><div class="card-body">';
+        card += comment.Entry;
+        card += '</div></div>';
+        $('#comments').append(card);
+      }
+
+      function buildEvent(event) {
+        var line = '<li>';
+        line += event.EventType;
+        line += ' at ' + event.Timestamp;
+        line += ' by ' + event.Name;
+        line += '</li>';
+        $('#history > ul').append(line);
+      }
+    });
+    </script>
+  </body>
+</html>

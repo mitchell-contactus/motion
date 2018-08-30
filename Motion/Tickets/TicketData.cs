@@ -32,7 +32,9 @@ namespace Motion.Tickets
         form_id,
         forms.name,
         (CONVERT_TZ( (updated_at), 'UTC','{3}')) as updated_at,
-        assigned_to, 
+        assigned_to,
+        assigned.username,
+        assigned.name,
         client_guid, 
         contact_id,
         contact.username,
@@ -56,6 +58,10 @@ namespace Motion.Tickets
         {0}.auth_local contact
         ON
         contact_id = contact.id
+        LEFT JOIN
+        {0}.auth_local assigned
+        ON
+        assigned_to = assigned.id
         LEFT JOIN
         {0}.tt_ticket_forms forms
         ON
@@ -91,15 +97,17 @@ namespace Motion.Tickets
                         FormName = select.IsDBNull(16) ? null : select.GetString(16),
                         UpdatedDate = select.IsDBNull(17) ? null : select.GetString(17),
                         AssignedId = select.IsDBNull(18) ? null : new int?(select.GetInt32(18)),
-                        ClientGuid = select.IsDBNull(19) ? null : select.GetString(19),
-                        ContactId = select.IsDBNull(20) ? null : new int?(select.GetInt32(20)),
-                        ContactUsername = select.IsDBNull(21) ? null : select.GetString(21),
-                        ContactName = select.IsDBNull(22) ? null : select.GetString(22),
-                        ReasonId = select.IsDBNull(23) ? null : new int?(select.GetInt32(23)),
-                        ParentId = select.IsDBNull(24) ? null : new int?(select.GetInt32(24)),
-                        Priority = select.IsDBNull(25) ? null : new int?(select.GetInt32(25)),
-                        LockedById = select.IsDBNull(26) ? null : new int?(select.GetInt32(26)),
-                        SourceType = select.IsDBNull(27) ? null : select.GetString(27)
+                        AssignedUsername = select.IsDBNull(19) ? null : select.GetString(19),
+                        AssignedName = select.IsDBNull(20) ? null : select.GetString(20),
+                        ClientGuid = select.IsDBNull(21) ? null : select.GetString(21),
+                        ContactId = select.IsDBNull(22) ? null : new int?(select.GetInt32(22)),
+                        ContactUsername = select.IsDBNull(23) ? null : select.GetString(23),
+                        ContactName = select.IsDBNull(24) ? null : select.GetString(24),
+                        ReasonId = select.IsDBNull(25) ? null : new int?(select.GetInt32(25)),
+                        ParentId = select.IsDBNull(26) ? null : new int?(select.GetInt32(26)),
+                        Priority = select.IsDBNull(27) ? null : new int?(select.GetInt32(27)),
+                        LockedById = select.IsDBNull(28) ? null : new int?(select.GetInt32(28)),
+                        SourceType = select.IsDBNull(29) ? null : select.GetString(29)
                     };
                 }
             }

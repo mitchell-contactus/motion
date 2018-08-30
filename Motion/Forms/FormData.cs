@@ -244,7 +244,7 @@ namespace Motion.Forms
             using (var select = Select(GetPermissionsForFormQuery,
                                        Config.Get("mysql_db"), session.AccountId, session.UserId, formId))
             {
-                if (select.Read())
+                if (select.Read() && !select.IsDBNull(0))
                 {
                     return new FormPermissions()
                     {

@@ -24,6 +24,8 @@ namespace Motion.Tickets
         public string FormName { get; internal set; }
         public string UpdatedDate { get; internal set; }
         public int? AssignedId { get; internal set; }
+        public string AssignedUsername { get; internal set; }
+        public string AssignedName { get; internal set; }
         public string ClientGuid { get; internal set; }
         public int? ContactId { get; internal set; }
         public string ContactUsername { get; internal set; }

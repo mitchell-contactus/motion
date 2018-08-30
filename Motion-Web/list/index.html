@@ -26,8 +26,8 @@
       <div class="row d-flex d-md-block flex-nowrap">
         <div class="col-md-1 float-left col-1 bg-secondary collapse width show" id="sidebar">
           <nav class="nav flex-column">
-            <a class="nav-link text-light" href="#">Home</a>
-            <a class="nav-link text-light" href="#">List</a>
+            <a class="nav-link text-light" href="/">Home</a>
+            <a class="nav-link text-light" href="/list">List</a>
             <a class="nav-link text-light" href="#">Create Case</a>
           </nav>
         </div>
@@ -98,12 +98,15 @@
             $.each(data, function(i, ticket) {
               $('#listBody').append(buildRow(ticket));
             });
+            $('#listBody tr').click(function(event) {
+              document.location = '/view/?ticketId=' + event.target.parentElement.id;
+            });
           }
         });
       }
 
       function buildRow(ticket) {
-        var row = '<tr>';
+        var row = '<tr id="' + ticket.ID + '">';
         row += '<td>' + ticket.ID + '</td>';
         row += '<td>' + ((ticket.Priority == null) ? '' : ticket.Priority) + '</td>';
         row += '<td>' + ticket.FormName + '</td>';
