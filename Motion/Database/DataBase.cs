@@ -37,7 +37,7 @@ namespace Motion.Database
         /// <summary>
         ///     Escapes the string for database use
         /// </summary>
-        protected string E(string s) {
+        public static string E(string s) {
             return MySqlHelper.EscapeString(s);
         }
 

@@ -41,7 +41,26 @@
           </div>
           <div class="row pl-3">
             <div class="col">
-              <h1>Home Page</h1>
+              <h1>Tickets</h1>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ticket #</th>
+                    <th>Priority</th>
+                    <th>Queue</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Subject</th>
+                    <th>Opened By</th>
+                    <th>Assigned To</th>
+                    <th>Due</th>
+                    <th>Last Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="listBody">
+
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -64,6 +83,40 @@
       $('#logout').click(function() {
         session.clearSession();
       });
+
+      loadTickets();
+
+      function loadTickets() {
+        $('#listBody').empty();
+        $.ajax({
+          url: '/api/tickets/list',
+          type: 'POST',
+          data: {
+            session: session.session
+          },
+          success: function(data) {
+            $.each(data, function(i, ticket) {
+              $('#listBody').append(buildRow(ticket));
+            });
+          }
+        });
+      }
+
+      function buildRow(ticket) {
+        var row = '<tr>';
+        row += '<td>' + ticket.ID + '</td>';
+        row += '<td>' + ((ticket.Priority == null) ? '' : ticket.Priority) + '</td>';
+        row += '<td>' + ticket.FormName + '</td>';
+        row += '<td>' + ticket.Status + '</td>';
+        row += '<td>' + ticket.CreatedDate + '</td>';
+        row += '<td>' + ticket.Subject + '</td>';
+        row += '<td>' + ticket.OpenedByName + '</td>';
+        row += '<td>' + ((ticket.AssignedName == null) ? '' : ticket.AssignedName) + '</td>';
+        row += '<td>' + ((ticket.DueDate == null) ? '' : ticket.DueDate) + '</td>';
+        row += '<td>' + ticket.UpdatedDate + '</td>';
+        row += '</tr>';
+        return row;
+      }
     });
     </script>
   </body>

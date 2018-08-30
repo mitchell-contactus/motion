@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 using System.Web;
 using Grapevine.Server;
+using Motion.Sessions;
 
 namespace Motion.Rest
 {
     public abstract class RestBase : RESTResource
     {
+
+        readonly SessionData sessionData = new SessionData();
+
         protected NameValueCollection GetRequestPostData(HttpListenerRequest request)
         {
             if (!request.HasEntityBody)
@@ -30,6 +35,20 @@ namespace Motion.Rest
                     }
                 }
             }
+        }
+
+        protected Session ValidateSession(NameValueCollection postData) {
+            if (!postData.AllKeys.Contains("session"))
+            {
+                throw new InputException("session");
+            }
+
+            var session = sessionData.GetSession(postData["session"]);
+            if (session == null)
+            {
+                throw new RequestException("Invalid Session");
+            }
+            return session;
         }
 
         protected void SendUnexpectedError(HttpListenerContext context, string errorDetail = "")
