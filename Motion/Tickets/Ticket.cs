@@ -11,7 +11,7 @@ namespace Motion.Tickets
         public string ClosedDate { get; internal set; }
         public string DueDate { get; internal set; }
         public string FirstTouchDate { get; internal set; }
-        public int Status { get; internal set; }
+        public TICKET_STATUS Status { get; internal set; }
         public int? OpenedById { get; internal set; }
         public string OpenedByUsername { get; internal set; }
         public string OpenedByName { get; internal set; }
@@ -44,5 +44,16 @@ namespace Motion.Tickets
         {
             this.ID = ID;
         }
+    }
+
+    public enum TICKET_STATUS
+    {
+        ERROR = -1,
+        OPEN = 0,
+        CLOSED = 1,
+        WAITING_FOR_MORE_INFO = 2,
+        HOLD = 3,
+        REJECTED = 4,
+        WORKING = 5
     }
 }

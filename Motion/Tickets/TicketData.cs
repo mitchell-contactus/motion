@@ -84,7 +84,7 @@ namespace Motion.Tickets
                         DueDate = select.IsDBNull(3) ? null : select.GetString(3),
 
                         FirstTouchDate = select.IsDBNull(5) ? null : select.GetString(5),
-                        Status = select.GetInt32(6),
+                        Status = (TICKET_STATUS) select.GetInt32(6),
                         OpenedById = select.IsDBNull(7) ? null : new int?(select.GetInt32(7)),
                         OpenedByUsername = select.IsDBNull(8) ? null : select.GetString(8),
                         OpenedByName = select.IsDBNull(9) ? null : select.GetString(9),
@@ -170,11 +170,54 @@ namespace Motion.Tickets
                     UserId = select.GetInt32(0),
                     Name = select.IsDBNull(1) ? null : select.GetString(1),
                     Username = select.GetString(2),
-                    EventType = select.GetInt32(3),
+                    EventType = (Motion.Tickets.TICKET_EVENT)select.GetInt32(3),
                     Timestamp = select.GetString(4)
                 });
             }
             return history;
+        }
+
+        const string ApplyEditQuery = 
+        @"UPDATE
+        {0}.tt_tickets
+        SET
+        updated_at = now(),
+        last_action_activity_by = {2},
+        last_action_activity_at = now(),
+        {3}
+        WHERE
+        id = {1}";
+        public void ApplyEdit(Session session, int ticketId, TicketEdit edit)
+        {
+            string updates = String.Join(",", edit.UpdateQueries);
+            Update(ApplyEditQuery, Config.Get("mysql_db"), ticketId, session.UserId, updates);
+
+            foreach (var e in edit.Events)
+            {
+                LogEvent(session, ticketId, e.Key, e.Value);
+            }
+        }
+
+        const string LogEventQuery = 
+        @"INSERT INTO
+        {0}.tt_ticket_history (
+        ticket_id,
+        account_id,
+        event_at,
+        event_by,
+        event_type,
+        detail)
+        VALUES (
+        {1},
+        {2},
+        now(),
+        {3},
+        {4},
+        ""{5}"")";
+        public void LogEvent(Session session, int ticketId, TICKET_EVENT eventType, string eventDetail)
+        {
+            Insert(LogEventQuery, Config.Get("mysql_db"), ticketId, session.AccountId, 
+                   session.UserId, (int) eventType, E(eventDetail));
         }
     } 
 }

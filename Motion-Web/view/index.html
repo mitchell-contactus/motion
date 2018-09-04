@@ -44,29 +44,142 @@
               <!-- Begin main page content -->
               <div class="container-fluid">
                 <div class="row">
-                  <div class="col">
-                    <h1>Case <entry id="ticketId"></entry>: <entry id="subject"></entry></h1>
+                  <div class="col form-inline">
+                    <h1>
+                      Case <static data="ID"></static>: <entry data="Subject" type="text"></entry>
+                      <input type="text" class="form-control form-control-lg" data="Subject" hidden/>
+                    </h1>
+                  </div>
+                  <div class="col-2">
+                    <button id="edit-button" type="button" class="btn btn-primary float-right edit-button" disabled>Edit</button>
+                    <button id="discard-button" type="button" class="btn btn-warning float-right edit-button" hidden>Discard</button>
+                    <button id="save-button" type="button" class="btn btn-success float-right mr-1 edit-button" hidden>Save</button>
                   </div>
                 </div>
                 <div class="row mb-4">
                   <div class="col">
-                    <ul class="list-group">
-                      <li class="list-group-item">Queue: <entry id="form"></entry></li>
-                      <li class="list-group-item">Created By: <entry id="createdBy"></entry></li>
-                      <li class="list-group-item">Messages: <entry id="messageCount"></entry></li>
-                      <li class="list-group-item">Priority: <entry id="priority"></entry></li>
-                      <li class="list-group-item">Source: <entry id="source"></entry></li>
-                      <li class="list-group-item">Contact: <entry id="contact"></entry></li>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Queue:</span>
+                          </div>
+                          <entry type="select" class="form-control" id="form" data="FormId"></entry>
+                          <select class="custom-select" id="form" data="/api/forms/list" dataText="Name" dataValue="ID" hidden></select>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Created By:</span>
+                          </div>
+                          <static class="form-control" data="OpenedByName"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Messages:</span>
+                          </div>
+                          <static class="form-control" id="messageCount"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Priority:</span>
+                          </div>
+                          <entry type="select" class="form-control" id="priority"></entry>
+                          <select class="custom-select" id="priority" hidden>
+                            <option value="null">Set a Priority</option>
+                            <option value="1">1 - Highest</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Lowest</option>
+                          </select>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Source:</span>
+                          </div>
+                          <static class="form-control" data="SourceType"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Contact:</span>
+                          </div>
+                          <static class="form-control" id="contact"></static>
+                        </div>
+                      </li>
                     </ul>
                   </div>
                   <div class="col">
-                    <ul class="list-group">
-                      <li class="list-group-item">Status: <entry id="status"></entry></li>
-                      <li class="list-group-item">Last Updated: <entry id="updated"></entry></li>
-                      <li class="list-group-item">Created: <entry id="created"></entry></li>
-                      <li class="list-group-item">Assigned To: <entry id="assigned"></entry></li>
-                      <li class="list-group-item">Due: <entry id="due"></entry></li>
-                      <li class="list-group-item">Participants: <entry id="participants"></entry></li>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Status:</span>
+                          </div>
+                          <entry type="select" class="form-control" id="status" data="Status"></entry>
+                          <select class="custom-select" id="status" hidden>
+                            <option value="0">Open</option>
+                            <option value="2">Waiting For More Info</option>
+                            <option value="3">On Hold</option>
+                            <option value="4">Rejected</option>
+                            <option value="5">Working</option>
+                            <option value="6">Waiting For Confimation</option>
+                            <option value="1">Closed</option>
+                          </select>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Last Updated:</span>
+                          </div>
+                          <static class="form-control" data="UpdatedDate"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Created:</span>
+                          </div>
+                          <static class="form-control" data="CreatedDate"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Assigned To:</span>
+                          </div>
+                          <entry type="select" class="form-control" id="assigned" data="AssignedId"></entry>
+                          <select class="custom-select" id="assigned" data="/api/users/list" dataText="Name" dataValue="ID" nullValue="No One" hidden>
+                            <option value="null">No One</option>
+                          </select>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Due:</span>
+                          </div>
+                          <static class="form-control" id="due"></static>
+                        </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text">Participants:</span>
+                          </div>
+                          <static class="form-control" id="participants"></static>
+                        </div>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -101,6 +214,7 @@
     <script src="/js/cookie.js"></script>
     <script src="/js/session.js"></script>
     <script src="/js/utils.js"></script>
+    <script src="view.js"></script>
 
     <script>
     $(document).ready(function() {
@@ -109,6 +223,8 @@
         document.location = "/login";
         return;
       }
+
+      var ticketId = getJsonFromUrl()['ticketId'];
 
       $('#logout').click(function() {
         session.clearSession();
@@ -128,61 +244,30 @@
         $('#history').prop('hidden', false);
       });
 
-      var ticketId = getJsonFromUrl()['ticketId'];
-      loadTicket(ticketId);
+      $('#edit-button').click(function() {
+        $('#edit-button').prop('hidden', true);
+        $('#save-button').prop('hidden', false);
+        $('#discard-button').prop('hidden', false);
+        makeEditable();
+      });
 
-      function loadTicket(ticketId) {
-        $.ajax({
-          url: '/api/tickets/view',
-          type: 'POST',
-          data: {
-            session: session.session,
-            ticketId: ticketId
-          },
-          success: function(ticket) {
-            $('#ticketId').text(ticket.ID);
-            $('#subject').text(ticket.Subject);
-            $('#form').text(ticket.FormName);
-            $('#createdBy').text(ticket.OpenedByName);
-            $('#messageCount').text(ticket.Comments.length);
-            $('#priority').text(ticket.Priority == null ? "--" : ticket.Priority);
-            $('#source').text(ticket.SourceType);
-            $('#contact').text(ticket.ContactName == null ? "No Contact Selected" : ticket.ContactName);
-            $('#status').text(ticket.Status);
-            $('#updated').text(ticket.UpdatedDate);
-            $('#created').text(ticket.CreatedDate);
-            $('#assigned').text(ticket.AssignedName == null ? "No One" : ticket.AssignedName);
-            $('#due').text(ticket.DueDate == null ? "Not Assigned" : ticket.DueDate);
+      $('#save-button').click(function() {
+        $('#edit-button').prop('hidden', false);
+        $('#save-button').prop('hidden', true);
+        $('#discard-button').prop('hidden', true);
+        saveEdits(ticketId, session);
+        discardEdits();
+        loadTicket(ticketId, session);
+      });
 
-            $.each(ticket.Comments, function(i, comment) {
-              buildComment(comment);
-            });
-            $.each(ticket.History, function(i, event) {
-              buildEvent(event);
-            });
-          }
-        });
-      }
+      $('#discard-button').click(function() {
+        $('#edit-button').prop('hidden', false);
+        $('#save-button').prop('hidden', true);
+        $('#discard-button').prop('hidden', true);
+        discardEdits();
+      });
 
-      function buildComment(comment) {
-        var card = '<div class="card mb-2">';
-        card += '<div class="card-header">';
-        card += '<h5>' + comment.UserName + '</h5>';
-        card += comment.CreatedDate;
-        card += '</div><div class="card-body">';
-        card += comment.Entry;
-        card += '</div></div>';
-        $('#comments').append(card);
-      }
-
-      function buildEvent(event) {
-        var line = '<li>';
-        line += event.EventType;
-        line += ' at ' + event.Timestamp;
-        line += ' by ' + event.Name;
-        line += '</li>';
-        $('#history > ul').append(line);
-      }
+      loadTicket(ticketId, session);
     });
     </script>
   </body>

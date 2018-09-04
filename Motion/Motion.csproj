@@ -67,6 +67,9 @@
     <Compile Include="Tickets\Ticket.cs" />
     <Compile Include="Comments\CommentData.cs" />
     <Compile Include="Comments\Comment.cs" />
+    <Compile Include="Forms\Form.cs" />
+    <Compile Include="Forms\FormRestHandler.cs" />
+    <Compile Include="Tickets\TicketEdit.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

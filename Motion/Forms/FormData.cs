@@ -70,13 +70,13 @@ namespace Motion.Forms
             }
             query += "ORDER BY tt_tickets.id desc";
 
-            var permissions = GetFormPermissions(session);
+            var forms = GetForms(session);
             List<string> formIds = new List<string>();
-            foreach (var formId in permissions.Keys)
+            foreach (var form in forms)
             {
-                if (permissions[formId].CanView)
+                if (form.Permissions.CanView)
                 {
-                    formIds.Add(formId.ToString());
+                    formIds.Add(form.ID.ToString());
                 }
             }
 
@@ -112,9 +112,11 @@ namespace Motion.Forms
             return tickets;
         }
 
-        const string GetFormPermissionsQuery =
+        const string GetFormsQuery =
         @"SELECT
         forms.id,
+        forms.name,
+        forms.description,
         perm.can_view,
         perm.can_edit,
         perm.can_view_internal_comments,
@@ -174,23 +176,55 @@ namespace Motion.Forms
         forms.id = perm.form_id
         ORDER BY
         forms.id";
-        public Dictionary<int, FormPermissions> GetFormPermissions(Session session)
+        public List<Form> GetForms(Session session)
         {
             var defaultPermissions = GetPermissionsForForm(session, -1);
 
-            Dictionary<int, FormPermissions> permissions = new Dictionary<int, FormPermissions>();
-            using (var select = Select(GetFormPermissionsQuery, Config.Get("mysql_db"), session.AccountId, session.UserId))
+            List<Form> forms = new List<Form>();
+            using (var select = Select(GetFormsQuery, Config.Get("mysql_db"), session.AccountId, session.UserId))
                 while (select.Read())
                 {
-                    permissions.Add(select.GetInt32(0), new FormPermissions()
+                    forms.Add(new Form(select.GetInt32(0))
                     {
-                        CanView = select.IsDBNull(1) ? defaultPermissions.CanView : select.GetBoolean(1),
-                        CanEdit = select.IsDBNull(2) ? defaultPermissions.CanEdit : select.GetBoolean(2),
-                        CanViewInternalComments = select.IsDBNull(3) ? defaultPermissions.CanViewInternalComments : select.GetBoolean(3),
-                        CanDelete = select.IsDBNull(4) ? defaultPermissions.CanDelete : select.GetBoolean(4)
+                        Name = select.IsDBNull(1) ? null : select.GetString(1),
+                        Description = select.IsDBNull(2) ? null : select.GetString(2),
+                        Permissions = new FormPermissions()
+                        {
+                            CanView = select.IsDBNull(3) ? defaultPermissions.CanView : select.GetBoolean(3),
+                            CanEdit = select.IsDBNull(4) ? defaultPermissions.CanEdit : select.GetBoolean(4),
+                            CanViewInternalComments = select.IsDBNull(5) ? defaultPermissions.CanViewInternalComments : select.GetBoolean(5),
+                            CanDelete = select.IsDBNull(6) ? defaultPermissions.CanDelete : select.GetBoolean(6)
+                        }
                     });
                 }
-            return permissions;
+            return forms;
+        }
+
+        const string GetFormQuery = 
+        @"SELECT
+        id,
+        name,
+        description
+        FROM
+        {0}.tt_ticket_forms
+        WHERE
+        account_id = {1}
+        AND
+        id = {2}";
+        public Form GetForm(Session session, int formId)
+        {
+            using (var select = Select(GetFormQuery, Config.Get("mysql_db"), session.AccountId, formId))
+            {
+                if (select.Read())
+                {
+                    return new Form(select.GetInt32(0))
+                    {
+                        Name = select.IsDBNull(1) ? null : select.GetString(1),
+                        Description = select.IsDBNull(2) ? null : select.GetString(2)
+                    };
+                }
+            }
+            return null;
         }
 
         const string GetPermissionsForFormQuery =

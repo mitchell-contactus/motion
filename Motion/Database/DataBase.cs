@@ -34,6 +34,10 @@ namespace Motion.Database
             MySqlHelper.ExecuteNonQuery(ConnectionStringReadWrite, query);
         }
 
+        protected void Update(String queryString, params object[] parameters) {
+            Insert(queryString, parameters);
+        }
+
         /// <summary>
         ///     Escapes the string for database use
         /// </summary>

@@ -64,5 +64,40 @@ namespace Motion.Tickets
                 SendMissingParameter(context, e.Reason);
             }
         }
+
+        [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/tickets/edit")]
+        public void EditTicket(HttpListenerContext context)
+        {
+            try
+            {
+                var data = GetRequestPostData(context.Request);
+                var session = ValidateSession(data);
+
+                if (!data.AllKeys.Contains("ticketId"))
+                {
+                    throw new InputException("ticketId");
+                }
+                int ticketId = Convert.ToInt32(data["ticketId"]);
+
+                var ticket = ticketData.GetTicket(session, ticketId);
+                if (ticket == null || !ticket.Permissions.CanEdit)
+                {
+                    ticketData.LogEvent(session, ticketId, TICKET_EVENT.SECURITY_PREVENTED, null);
+                    throw new RequestException("Not authorized to edit ticket");
+                }
+
+                TicketEdit edit = new TicketEdit(session, data, ticket);
+                ticketData.ApplyEdit(session, ticketId, edit);
+                SendTextResponse(context, "1");
+            }
+            catch (RequestException e)
+            {
+                SendUnexpectedError(context, e.Reason);
+            }
+            catch (InputException e)
+            {
+                SendMissingParameter(context, e.Reason);
+            }
+        }
     }
 }

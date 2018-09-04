@@ -42,6 +42,26 @@ namespace Motion.Users
             }
         }
 
+        [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/users/list")]
+        public void ListUsers(HttpListenerContext context)
+        {
+            try
+            {
+                var data = GetRequestPostData(context.Request);
+                var session = ValidateSession(data);
+                var users = userData.GetUsers(session);
+                SendJsonResponse(context, users);
+            }
+            catch (RequestException e)
+            {
+                SendUnexpectedError(context, e.Reason);
+            }
+            catch (InputException e)
+            {
+                SendMissingParameter(context, e.Reason);
+            }
+        }
+
         [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/auth/createSession")]
         public void CreateSession(HttpListenerContext context)
         {
