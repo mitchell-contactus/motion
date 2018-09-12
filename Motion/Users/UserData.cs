@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Motion.AD;
+using Motion.Contacts;
 using Motion.Database;
 using Motion.Sessions;
 
@@ -8,6 +9,8 @@ namespace Motion.Users
 {
     public class UserData : DataBase
     {
+        readonly ContactData contactData = new ContactData();
+
         const string AuthUserQuery =
             @"SELECT
         id,
@@ -164,9 +167,37 @@ namespace Motion.Users
             if (authLocalId != null)
             {
                 Insert(CreateUser2Query , Config.Get("mysql_db"), authLocalId, accountId);
+                MigrateContactToUser(accountId, emailAddress, authLocalId);
                 return GetUser(accountId, new UserQuery { ID = authLocalId });
             }
             return null;
+        }
+
+        const string MigrateContactToUserQuery = 
+        @"UPDATE {0}.tt_tickets 
+        SET opened_by = {1} 
+        WHERE opened_by = {2};
+        UPDATE {0}.tt_tickets 
+        SET closed_by = {1} 
+        WHERE closed_by = {2};
+        UPDATE {0}.tt_tickets 
+        SET assigned_to = {1} 
+        WHERE assigned_to = {2};
+        UPDATE {0}.tt_tickets 
+        SET contact_id = {1} 
+        WHERE contact_id = {2}
+        UPDATE {0}.tt_ticket_comments 
+        SET created_by = {1} 
+        WHERE created_by = {2};
+        DELETE FROM {0}.tt_contacts 
+        WHERE id= {2};";
+        public void MigrateContactToUser(int accountId, string emailAddress, int? userId)
+        {
+            var contacts = contactData.getContacts(accountId, new ContactQuery { Email = emailAddress });
+            foreach (var contact in contacts)
+            {
+                Update(MigrateContactToUserQuery, Config.Get("mysql_db"), userId, contact.ID);
+            }
         }
 
         const string UpdateADGroupsForUserQuery = 

@@ -54,7 +54,6 @@ namespace Motion.AD
                 {
                     throw new RequestException("Error creating user");
                 }
-                //TODO: Merge contacts into user
             }
             else
             {

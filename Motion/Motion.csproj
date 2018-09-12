@@ -73,11 +73,13 @@
     <Compile Include="Tickets\TicketEdit.cs" />
     <Compile Include="AD\ADConnection.cs" />
     <Compile Include="AD\ADConnectionFactory.cs" />
-    <Compile Include="AD\ADData.cs" />
     <Compile Include="Accounts\Account.cs" />
     <Compile Include="Accounts\AccountData.cs" />
     <Compile Include="AD\ADInfo.cs" />
     <Compile Include="Users\UserQuery.cs" />
+    <Compile Include="Contacts\ContactData.cs" />
+    <Compile Include="Contacts\Contact.cs" />
+    <Compile Include="Contacts\ContactQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -94,6 +96,7 @@
     <Folder Include="Comments\" />
     <Folder Include="AD\" />
     <Folder Include="Accounts\" />
+    <Folder Include="Contacts\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
