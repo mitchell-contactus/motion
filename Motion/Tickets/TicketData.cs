@@ -116,10 +116,10 @@ namespace Motion.Tickets
                 return null;
             }
 
-            ticket.History = GetTicketHistory(session, ticketId);
-            ticket.Comments = commentData.GetCommentsForTicket(session, ticketId);
-
             ticket.Permissions = new TicketPermissions(formData.GetPermissionsForForm(session, ticket.FormId));
+            ticket.History = GetTicketHistory(session, ticketId);
+            ticket.Comments = commentData.GetCommentsForTicket(session, ticketId, ticket.Permissions);
+
             if (ticket.AssignedId == session.UserId)
             {
                 ticket.Permissions.CanView = true;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Motion.AD;
 using Motion.Database;
 using Motion.Sessions;
 
@@ -8,7 +9,7 @@ namespace Motion.Users
     public class UserData : DataBase
     {
         const string AuthUserQuery =
-        @"SELECT
+            @"SELECT
         id,
         username,
         name,
@@ -39,53 +40,6 @@ namespace Motion.Users
                 }
             }
             return null;
-        }
-
-        const string GetAccountsForUserQuery =
-        @"SELECT 
-        auth_customer.account_id, 
-        accounts.name 
-        FROM 
-        {0}.auth_customer 
-        INNER JOIN 
-        {0}.accounts 
-        ON 
-        accounts.id=auth_customer.account_id 
-        WHERE 
-        auth_customer.auth_local_id={1} 
-        ORDER BY 
-        name ASC";
-        public Dictionary<int, string> GetAccountsForUser(User user) {
-            if (user.IsGlobalAdmin)
-            {
-                return GetAccounts();
-            }
-
-            Dictionary<int, string> list = new Dictionary<int, string>();
-            using (var select = Select(GetAccountsForUserQuery, Config.Get("mysql_db"), user.ID))
-                while (select.Read())
-            {
-                list.Add(select.GetInt32(0), select.IsDBNull(1) ? null : select.GetString(1));
-            }
-            return list;
-        }
-
-        const string GetAccountsQuery =
-        @"SELECT 
-        id,
-        name 
-        FROM 
-        {0}.accounts 
-        ORDER BY 
-        name ASC";
-        public Dictionary<int, string> GetAccounts() {
-            Dictionary<int, string> list = new Dictionary<int, string>();
-            using (var select = Select(GetAccountsQuery, Config.Get("mysql_db")))
-                while (select.Read())
-            {
-                list.Add(select.GetInt32(0), select.IsDBNull(1) ? null : select.GetString(1));
-            }
-            return list;
         }
 
         const string GetUsersQuery = 
@@ -155,14 +109,15 @@ namespace Motion.Users
             is_global_admin=1
         )
         AND
-        id = {2}
+        {2}
         GROUP BY
         id
         ORDER BY 
         name REGEXP '^[a-z]' DESC, name";
-        public User GetUser(Session session, int userId)
+        public User GetUser(int accountId, UserQuery query)
         {
-            using (var select = Select(GetUserQuery, Config.Get("mysql_db"), session.AccountId, userId))
+            var queryString = String.Join(" AND ", query.GenerateQueries());
+            using (var select = Select(GetUserQuery, Config.Get("mysql_db"), accountId, queryString))
             {
                 if (select.Read())
                 {
@@ -177,6 +132,65 @@ namespace Motion.Users
                 }
             }
             return null;
+        }
+
+        const string CreateUserQuery = 
+        @"INSERT INTO 
+        {0}.auth_local 
+        (
+            username,
+            email_address,
+            name
+        ) 
+        VALUES
+        ('{1}','{1}','{2}')";
+        const string CreateUser2Query = 
+        @"INSERT INTO 
+        {0}.auth_customer 
+        (
+            auth_local_id,
+            account_id
+        ) 
+        VALUES
+        ({1},{2})";
+        public User CreateUser(string emailAddress, string firstName, string lastName, int accountId)
+        {
+            int? authLocalId = InsertReturnId(CreateUserQuery,
+                                              Config.Get("mysql_db"),
+                                              E(emailAddress),
+                                              E(String.Format("{0} {1}",
+                                                              firstName ?? "",
+                                                              lastName ?? "")));
+            if (authLocalId != null)
+            {
+                Insert(CreateUser2Query , Config.Get("mysql_db"), authLocalId, accountId);
+                return GetUser(accountId, new UserQuery { ID = authLocalId });
+            }
+            return null;
+        }
+
+        const string UpdateADGroupsForUserQuery = 
+        @"DELETE FROM 
+        {0}.auth_user_ad_groups_cache 
+        WHERE 
+        user_id={1}";
+        const string UpdateADGroupsForUser2Query =
+        @"INSERT INTO 
+        {0}.auth_user_ad_groups_cache 
+        (
+            user_id,
+            name
+        ) 
+        VALUES
+        ({1},'{2}');";
+        public void UpdateADGroupsForUser(int userId, ADInfo info)
+        {
+            //TODO: optimize this insert
+            Update(UpdateADGroupsForUserQuery, Config.Get("mysql_db"), userId);
+            foreach(var group in info.Groups)
+            {
+                Insert(UpdateADGroupsForUser2Query, Config.Get("mysql_db"), userId, E(group));
+            }
         }
     }
 }

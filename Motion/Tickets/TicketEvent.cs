@@ -30,6 +30,5 @@ namespace Motion.Tickets
         ADDED_PARTICIPANT = 13,
         REMOVED_PARTICIPANT = 14,
         CREATED_SUBTASK = 15
-
     };
 }

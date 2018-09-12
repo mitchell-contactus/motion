@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using Grapevine;
 using Grapevine.Server;
+using Motion.Accounts;
+using Motion.AD;
 using Motion.Rest;
 using Motion.Sessions;
 
@@ -13,6 +15,8 @@ namespace Motion.Users
     {
         readonly UserData userData = new UserData();
         readonly SessionData sessionData = new SessionData();
+        readonly AccountData accountData = new AccountData();
+        readonly ADConnectionFactory adConnectionFactory = new ADConnectionFactory();
 
         [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/auth/listAccountsForUser")]
         public void ListAccountsForUser(HttpListenerContext context)
@@ -24,7 +28,7 @@ namespace Motion.Users
 
                 if (user != null)
                 {
-                    var accountList = userData.GetAccountsForUser(user);
+                    var accountList = accountData.GetAccountsForUser(user);
                     SendJsonResponse(context, accountList);
                 }
                 else
@@ -87,14 +91,18 @@ namespace Motion.Users
 
                 if (user != null)
                 {
-                    var accountList = userData.GetAccountsForUser(user);
-                    if (accountList.ContainsKey(accountId))
-                    {
+                    var accountList = accountData.GetAccountsForUser(user);
+                    if (accountList.Find(a => a.ID == accountId) != null) {
                         var sessionId = sessionData.CreateSession(user, accountId);
-                        if (sessionId == null) {
+                        if (sessionId == null)
+                        {
                             throw new RequestException("Failed To Create Session");
                         }
                         SendTextResponse(context, sessionId);
+                    }
+                    else
+                    {
+                        SendInvalidAuth(context);
                     }
                 }
                 else
@@ -127,7 +135,8 @@ namespace Motion.Users
             var user = userData.AuthUser(data["username"], data["password"]);
             if (user == null)
             {
-                // TODO: Add AD authentication
+                var connection = adConnectionFactory.BuildConnection(data["username"]);
+                user = connection.Authenticate(data["password"]);
             }
             return user;
         }

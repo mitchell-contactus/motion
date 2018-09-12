@@ -41,6 +41,7 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Data" />
+    <Reference Include="Novell.Directory.Ldap" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -70,6 +71,13 @@
     <Compile Include="Forms\Form.cs" />
     <Compile Include="Forms\FormRestHandler.cs" />
     <Compile Include="Tickets\TicketEdit.cs" />
+    <Compile Include="AD\ADConnection.cs" />
+    <Compile Include="AD\ADConnectionFactory.cs" />
+    <Compile Include="AD\ADData.cs" />
+    <Compile Include="Accounts\Account.cs" />
+    <Compile Include="Accounts\AccountData.cs" />
+    <Compile Include="AD\ADInfo.cs" />
+    <Compile Include="Users\UserQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -84,6 +92,8 @@
     <Folder Include="Sessions\" />
     <Folder Include="Forms\" />
     <Folder Include="Comments\" />
+    <Folder Include="AD\" />
+    <Folder Include="Accounts\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

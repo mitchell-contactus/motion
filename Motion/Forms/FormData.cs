@@ -80,6 +80,8 @@ namespace Motion.Forms
                 }
             }
 
+            //TODO: Bug where if you don't have any permissions for any form this query will fail
+            //Either remove OR statement conditionally or make this return empty list when no form permissions (loses self assigned)
             List<FormTicket> tickets = new List<FormTicket>();
             using (var select = Select(query,
                                        Config.Get("mysql_db"),

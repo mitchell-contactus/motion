@@ -34,6 +34,16 @@ namespace Motion.Database
             MySqlHelper.ExecuteNonQuery(ConnectionStringReadWrite, query);
         }
 
+        protected int? InsertReturnId(String queryString, params object[] parameters) {
+            var query = String.Format(queryString + "; SELECT LAST_INSERT_ID();", parameters);
+            var result = MySqlHelper.ExecuteScalar(ConnectionStringReadWrite, query);
+            if (result == null)
+            {
+                return null;
+            }
+            return Convert.ToInt32(result);
+        }
+
         protected void Update(String queryString, params object[] parameters) {
             Insert(queryString, parameters);
         }

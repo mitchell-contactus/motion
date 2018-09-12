@@ -87,7 +87,7 @@ namespace Motion.Tickets
                 UpdateQueries.Add("assigned_to = " + ParseInt(data["AssignedId"]));
                 AddEvent(TICKET_EVENT.ASSIGNED,
                          "From " + (ticket.AssignedId != null ? ticket.AssignedName : "Not Previously Assigned") + 
-                         " => " + userData.GetUser(session, ParseInt(data["AssignedId"])));
+                         " => " + userData.GetUser(session.AccountId, new UserQuery { ID = ParseInt(data["AssignedId"]) }));
                 // TODO: Send email to watchers
             }
         }

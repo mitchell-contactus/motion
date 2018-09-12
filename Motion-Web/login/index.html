@@ -66,10 +66,10 @@
           password: password
         },
         success: function(data) {
-          for (accountId in data) {
-            $('#account').append('<option value="' + accountId + '">' + data[accountId] + '</option>')
-            $("#account-div").removeAttr("hidden");
-          }
+          $.each(data, function(i, account) {
+            $('#account').append('<option value="' + account.ID + '">' + account.Name + '</option>')
+          });
+          $("#account-div").removeAttr("hidden");
         },
         error: function(xhr, status, error) {
           $('#account-div:not([hidden])').prop('hidden', true);

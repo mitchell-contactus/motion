@@ -189,8 +189,20 @@
                       <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs">
                           <li class="nav-item"><a id="comment-toggle" class="nav-link active" href="#comments">Comments</a></li>
-                          <li class="nav-item"><a id="history-toggle" class="nav-link" href="#history">History</a></li>
+                          <li class="nav-item mr-auto"><a id="history-toggle" class="nav-link" href="#history">History</a></li>
+                          <button id="new-comment" class="btn btn-primary mb-1 pt-0 pb-0" data-toggle="collapse" data-target="#new-comment-box" aria-controls="new-comment-box" aria-expanded="false" aria-label="Toggle comment box">New Comment</button>
                         </ul>
+                      </div>
+                      <div id="new-comment-box" class="card-body collapse">
+                        <div class="form-group">
+                          <textarea id="commentBody" class="form-control" rows="10"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label for="submit-comment-assigned">Create as subtask to: </label>
+                          <select class="custom-select w-25" id="submit-comment-assigned" data="/api/users/list" dataText="Name" dataValue="ID" nullValue="No One"></select>
+                        </div>
+                        <button id="submit-comment-internal" class="btn btn-primary">Submit Internal Comment</button>
+                        <button id="submit-comment-external" class="btn btn-primary">Submit External Comment</button>
                       </div>
                       <div id="comments" class="card-body">
                       </div>
@@ -233,15 +245,17 @@
       $('#comment-toggle').click(function() {
         $('#ticket-body ul .active').removeClass('active');
         $('#comment-toggle').addClass('active');
-        $('#ticket-body > .card-body:not([hidden])').prop('hidden', true);
+        $('#ticket-body > .card-body:not([hidden]):not(.collapse)').prop('hidden', true);
         $('#comments').prop('hidden', false);
+        $('#new-comment').prop('hidden', false);
       });
 
       $('#history-toggle').click(function() {
         $('#ticket-body ul .active').removeClass('active');
         $('#history-toggle').addClass('active');
-        $('#ticket-body > .card-body:not([hidden])').prop('hidden', true);
+        $('#ticket-body > .card-body:not([hidden]):not(.collapse)').prop('hidden', true);
         $('#history').prop('hidden', false);
+        $('#new-comment').prop('hidden', true);
       });
 
       $('#edit-button').click(function() {
@@ -265,6 +279,16 @@
         $('#save-button').prop('hidden', true);
         $('#discard-button').prop('hidden', true);
         discardEdits();
+      });
+
+      $('#submit-comment-internal').click(function() {
+        comment(ticketId, session, 0);
+        loadTicket(ticketId, session);
+      });
+
+      $('#submit-comment-external').click(function() {
+        comment(ticketId, session, 1);
+        loadTicket(ticketId, session);
       });
 
       loadTicket(ticketId, session);
