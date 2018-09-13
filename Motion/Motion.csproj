@@ -80,6 +80,8 @@
     <Compile Include="Contacts\ContactData.cs" />
     <Compile Include="Contacts\Contact.cs" />
     <Compile Include="Contacts\ContactQuery.cs" />
+    <Compile Include="Views\ViewData.cs" />
+    <Compile Include="Views\View.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -97,6 +99,7 @@
     <Folder Include="AD\" />
     <Folder Include="Accounts\" />
     <Folder Include="Contacts\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

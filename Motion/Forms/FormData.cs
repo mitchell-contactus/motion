@@ -59,16 +59,16 @@ namespace Motion.Forms
             tt_tickets.form_id IN ({3})
             OR 
             assigned_to = {2}
-        )";
+        )
+        {5}
+        ORDER BY tt_tickets.id desc";
         public List<FormTicket> ListTickets(Session session, TicketFilter filter)
         {
-
-            string query = ListTicketsQuery;
-            foreach (var f in filter.GetFilters())
+            string filterQuery = String.Join(" AND ", filter.GetFilters());
+            if (filterQuery != "")
             {
-                query += " AND " + f;
+                filterQuery = " AND " + filterQuery;
             }
-            query += "ORDER BY tt_tickets.id desc";
 
             var forms = GetForms(session);
             List<string> formIds = new List<string>();
@@ -83,12 +83,13 @@ namespace Motion.Forms
             //TODO: Bug where if you don't have any permissions for any form this query will fail
             //Either remove OR statement conditionally or make this return empty list when no form permissions (loses self assigned)
             List<FormTicket> tickets = new List<FormTicket>();
-            using (var select = Select(query,
+            using (var select = Select(ListTicketsQuery,
                                        Config.Get("mysql_db"),
                                        session.AccountId,
                                        session.UserId,
                                        String.Join(",", formIds),
-                                       "EST"))
+                                       "EST",
+                                       filterQuery))
                 while (select.Read())
                 {
                     tickets.Add(new FormTicket(select.GetInt32(0))

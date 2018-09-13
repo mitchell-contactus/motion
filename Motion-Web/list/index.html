@@ -27,7 +27,8 @@
         <div class="col-md-1 float-left col-1 bg-secondary collapse width show" id="sidebar">
           <nav class="nav flex-column">
             <a class="nav-link text-light" href="/">Home</a>
-            <a class="nav-link text-light" href="/list">List</a>
+            <a class="nav-link text-light" href="/list?view=view">By View</a>
+            <a class="nav-link text-light" href="/list?view=queue">By Queue</a>
             <a class="nav-link text-light" href="#">Create Case</a>
           </nav>
         </div>
@@ -39,9 +40,18 @@
               </button>
             </div>
           </div>
-          <div class="row pl-3">
+          <div class="row">
             <div class="col">
               <h1>Tickets</h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2">
+              <select id="formSelect" class="custom-select"></select>
+            </div>
+          </div>
+          <div class="row pl-3">
+            <div class="col">
               <table class="table">
                 <thead>
                   <tr>
@@ -58,7 +68,6 @@
                   </tr>
                 </thead>
                 <tbody id="listBody">
-
                 </tbody>
               </table>
             </div>
@@ -69,8 +78,11 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js" integrity="sha256-JtqhFqs5gUCpfvwJq+z2FbIlXKzF4u49cajpAFjbg54=" crossorigin="anonymous"></script>
     <script src="/js/cookie.js"></script>
     <script src="/js/session.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="list.js"></script>
 
     <script>
     $(document).ready(function() {
@@ -84,42 +96,61 @@
         session.clearSession();
       });
 
-      loadTickets();
+      if (getJsonFromUrl().view == 'view') {
+        var view = getJsonFromUrl().viewId;
+        loadViews(session, view);
+        loadTicketsFromView(session, view);
+      } else {
+        var queue = getJsonFromUrl().formId;
+        loadForms(session, queue);
+        loadTicketsFromForm(session, queue);
+      }
 
-      function loadTickets() {
-        $('#listBody').empty();
-        $.ajax({
-          url: '/api/tickets/list',
-          type: 'POST',
-          data: {
-            session: session.session
-          },
-          success: function(data) {
-            $.each(data, function(i, ticket) {
-              $('#listBody').append(buildRow(ticket));
-            });
-            $('#listBody tr').click(function(event) {
-              document.location = '/view/?ticketId=' + event.target.parentElement.id;
-            });
+      $('#formSelect').change(function() {
+        if (getJsonFromUrl().view == 'view') {
+          var viewId = $(this).val();
+          if (viewId != 'null') {
+            loadTicketsFromView(session, viewId);
+
+            var oldUrl = getJsonFromUrl();
+            oldUrl.viewId = viewId;
+            window.history.pushState("formChange", "Motion", URI(location).query(oldUrl));
           }
-        });
-      }
+        } else {
+          var formId = $(this).val();
+          if (formId != 'null') {
+            loadTicketsFromForm(session, formId);
 
-      function buildRow(ticket) {
-        var row = '<tr id="' + ticket.ID + '">';
-        row += '<td>' + ticket.ID + '</td>';
-        row += '<td>' + ((ticket.Priority == null) ? '' : ticket.Priority) + '</td>';
-        row += '<td>' + ticket.FormName + '</td>';
-        row += '<td>' + ticket.Status + '</td>';
-        row += '<td>' + ticket.CreatedDate + '</td>';
-        row += '<td>' + ticket.Subject + '</td>';
-        row += '<td>' + ticket.OpenedByName + '</td>';
-        row += '<td>' + ((ticket.AssignedName == null) ? '' : ticket.AssignedName) + '</td>';
-        row += '<td>' + ((ticket.DueDate == null) ? '' : ticket.DueDate) + '</td>';
-        row += '<td>' + ticket.UpdatedDate + '</td>';
-        row += '</tr>';
-        return row;
-      }
+            var oldUrl = getJsonFromUrl();
+            oldUrl.formId = formId;
+            window.history.pushState("formChange", "Motion", URI(location).query(oldUrl));
+          }
+        }
+      });
+
+      window.onpopstate = function(e) {
+        if (e.state == "formChange") {
+          if (getJsonFromDocument(document).view == 'view') {
+            var view = getJsonFromDocument(document).viewId;
+            loadViews(session, view);
+            loadTicketsFromView(session, view);
+          } else {
+            var queue = getJsonFromDocument(document).formId;
+            loadForms(session, queue);
+            loadTicketsFromForm(session, queue);
+          }
+        } else {
+          if (getJsonFromDocument(document).view == 'view') {
+            var view = getJsonFromUrl().viewId;
+            loadViews(session, view);
+            loadTicketsFromView(session, view);
+          } else {
+            var queue = getJsonFromUrl().formId;
+            loadForms(session, queue);
+            loadTicketsFromForm(session, queue);
+          } 
+        }
+      };
     });
     </script>
   </body>
