@@ -31,7 +31,7 @@ function loadTicket(ticketId, session) {
   });
 
   $.ajax({
-    url: '/api/tickets/view',
+    url: '/apiv2/tickets/view',
     type: 'POST',
     data: {
       session: session.session,
@@ -232,7 +232,7 @@ function saveEdits(ticketId, session) {
 
   if (hasEdits) {
     $.ajax({
-        url: '/api/tickets/edit',
+        url: '/apiv2/tickets/edit',
         type: 'POST',
         data: data,
         async: false
@@ -255,7 +255,7 @@ function comment(ticketId, session, type) {
   }
 
   $.ajax({
-        url: '/api/tickets/comment',
+        url: '/apiv2/tickets/comment',
         type: 'POST',
         data: data,
         async: false

@@ -16,7 +16,7 @@ class Session {
 		}
 
 		$.ajax({
-        url: '/api/auth/createSession',
+        url: '/apiv2/auth/createSession',
         type: 'POST',
         data: {
           username: username,
@@ -25,7 +25,7 @@ class Session {
         },
         success: function(data) {
         	Cookies.set('sessionId', data);
-          document.location = '/';
+          document.location = '../';
         },
         error: function(xhr, status, error) {
         	alert(error);

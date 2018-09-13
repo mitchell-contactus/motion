@@ -5,7 +5,7 @@ function loadTicketsFromForm(session, formId) {
     data["formIds"] = formId;
   }
   $.ajax({
-    url: '/api/tickets/list',
+    url: '/apiv2/tickets/list',
     type: 'POST',
     data: data,
     success: function(data) {
@@ -13,7 +13,7 @@ function loadTicketsFromForm(session, formId) {
         $('#listBody').append(buildRow(ticket));
       });
       $('#listBody tr').click(function(event) {
-        document.location = '/view/?ticketId=' + event.target.parentElement.id;
+        document.location = '../view/?ticketId=' + event.target.parentElement.id;
       });
     }
   });
@@ -26,7 +26,7 @@ function loadTicketsFromView(session, viewId) {
     data["viewId"] = viewId;
   }
   $.ajax({
-    url: '/api/tickets/list',
+    url: '/apiv2/tickets/list',
     type: 'POST',
     data: data,
     success: function(data) {
@@ -34,7 +34,7 @@ function loadTicketsFromView(session, viewId) {
         $('#listBody').append(buildRow(ticket));
       });
       $('#listBody tr').click(function(event) {
-        document.location = '/view/?ticketId=' + event.target.parentElement.id;
+        document.location = '../view/?ticketId=' + event.target.parentElement.id;
       });
     }
   });
@@ -61,7 +61,7 @@ function loadForms(session, defaultForm) {
   $('#formSelect').append('<option value="null" selected>Queue</option>');
 
   $.ajax({
-    url: '/api/forms/list',
+    url: '/apiv2/forms/list',
     type: 'POST',
     data: {
       session: session.session
@@ -84,7 +84,7 @@ function loadViews(session, defaultView) {
   $('#formSelect').append('<option value="null" selected>View</option>');
 
   $.ajax({
-    url: '/api/views/list',
+    url: '/apiv2/views/list',
     type: 'POST',
     data: {
       session: session.session
