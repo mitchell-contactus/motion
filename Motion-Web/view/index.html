@@ -18,7 +18,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto"></ul>
-        <span class="text-light mr-4">User Name</span>
+        <span id="username" class="text-light mr-4"></span>
         <a class="text-light" href="../" id="logout"><i class="fa fa-sign-out"></i> Log Out</a>
       </div>
     </nav>
@@ -239,6 +239,7 @@
 
       var ticketId = getJsonFromUrl()['ticketId'];
 
+      $('#username').text(session.username);
       $('#logout').click(function() {
         session.clearSession();
       });

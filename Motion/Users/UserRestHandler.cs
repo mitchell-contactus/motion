@@ -18,6 +18,26 @@ namespace Motion.Users
         readonly AccountData accountData = new AccountData();
         readonly ADConnectionFactory adConnectionFactory = new ADConnectionFactory();
 
+        [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/users/getUserForSession")]
+        public void GetUserForSession(HttpListenerContext context)
+        {
+            try
+            {
+                var data = GetRequestPostData(context.Request);
+                var session = ValidateSession(data);
+                var user = userData.GetUser(session.AccountId, new UserQuery { ID = session.UserId });
+                SendJsonResponse(context, user);
+            }
+            catch (RequestException e)
+            {
+                SendUnexpectedError(context, e.Reason);
+            }
+            catch (InputException e)
+            {
+                SendMissingParameter(context, e.Reason);
+            }
+        }
+
         [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/auth/listAccountsForUser")]
         public void ListAccountsForUser(HttpListenerContext context)
         {
