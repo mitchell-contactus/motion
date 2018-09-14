@@ -82,6 +82,7 @@
     <Compile Include="Contacts\ContactQuery.cs" />
     <Compile Include="Views\ViewData.cs" />
     <Compile Include="Views\View.cs" />
+    <Compile Include="Forms\Field.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

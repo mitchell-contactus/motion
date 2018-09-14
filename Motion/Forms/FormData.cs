@@ -307,5 +307,68 @@ namespace Motion.Forms
                 CanDelete = false
             };
         }
+
+        const string GetFieldsForFormQuery = 
+        @"SELECT
+        {0}.tt_ticket_form_fields.id,
+        field_name,
+        type,
+        dependent_on,
+        hint,
+        sort_order,
+        required
+        FROM
+        {0}.tt_ticket_form_fields
+        JOIN
+        {0}.tt_ticket_fields
+        ON
+        field_id = {0}.tt_ticket_fields.id
+        JOIN
+        {0}.tt_ticket_field_types
+        ON
+        field_type = {0}.tt_ticket_field_types.id
+        WHERE
+        form_id = {1}";
+        public List<Field> GetFieldsForForm(int formId)
+        {
+            List<Field> fields = new List<Field>();
+            using (var select = Select(GetFieldsForFormQuery, Config.Get("mysql_db"), formId))
+                while (select.Read())
+                {
+                    Field field = new Field(select.GetInt32(0))
+                    {
+                        Name = select.IsDBNull(1) ? null : select.GetString(1),
+                        Type = select.IsDBNull(2) ? null : select.GetString(2),
+                        DependentOn = select.IsDBNull(3) ? null : (int?)select.GetInt32(3),
+                        Hint = select.IsDBNull(4) ? null : select.GetString(4),
+                        SortOrder = select.GetInt32(5),
+                        Required = select.GetInt32(6) == 1
+                    };
+                    if (field.Type == "multiselect" || field.Type == "select")
+                    {
+                        field.Options = GetOptionsForField(field.ID);
+                    }
+                    fields.Add(field);
+                }
+            return fields;
+        }
+
+        const string GetOptionsForFieldQuery = 
+        @"SELECT
+        value
+        FROM
+        {0}.tt_ticket_field_options
+        WHERE
+        field_id = {1}";
+        private List<string> GetOptionsForField(int fieldId)
+        {
+            List<string> options = new List<string>();
+            using (var select = Select(GetOptionsForFieldQuery, Config.Get("mysql_db"), fieldId))
+                while (select.Read())
+                {
+                    options.Add(select.IsDBNull(0) ? null : select.GetString(0));
+                }
+            return options;
+        }
     }
 }

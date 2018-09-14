@@ -6,7 +6,7 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <link href="css/collapse-fix.css" rel="stylesheet">
+    <link href="../css/collapse-fix.css" rel="stylesheet">
 
     <title>Motion</title>
   </head>
@@ -19,17 +19,17 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto"></ul>
         <span id="username" class="text-light mr-4"></span>
-        <a class="text-light" href="" id="logout"><i class="fa fa-sign-out"></i> Log Out</a>
+        <a class="text-light" href="../" id="logout"><i class="fa fa-sign-out"></i> Log Out</a>
       </div>
     </nav>
   	<div class="container-fluid ">
       <div class="row d-flex d-md-block flex-nowrap">
         <div class="col-md-1 float-left col-1 bg-secondary collapse width show" id="sidebar">
           <nav class="nav flex-column">
-            <a class="nav-link text-light" href="">Home</a>
-            <a class="nav-link text-light" href="list?view=view">By View</a>
-            <a class="nav-link text-light" href="list?view=queue">By Queue</a>
-            <a class="nav-link text-light" href="create">Create Case</a>
+            <a class="nav-link text-light" href="../">Home</a>
+            <a class="nav-link text-light" href="../list?view=view">By View</a>
+            <a class="nav-link text-light" href="../list?view=queue">By Queue</a>
+            <a class="nav-link text-light" href="">Create Case</a>
           </nav>
         </div>
         <div class="col-md-9 float-left bg-white">
@@ -42,7 +42,29 @@
           </div>
           <div class="row pl-3">
             <div class="col">
-              <h1>Home Page</h1>
+              <h1>Create a new Case</h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2 form-group">
+              <label for="form">Queue: </label>
+              <select id="form" class="custom-select"></select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 form-group">
+              <label for="subject">Subject: </label>
+              <input type="text" class="form-control" id="subject" />
+            </div>
+          </div>
+          <div class="row">
+            <div id="custom-forms" class="col-5">
+
+            </div>
+          </div>
+          <div class="row mb-5">
+            <div class="col">
+              <button class="btn btn-primary">Create</button>
             </div>
           </div>
         </div>
@@ -51,20 +73,28 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <script src="js/cookie.js"></script>
-    <script src="js/session.js"></script>
+    <script src="../js/cookie.js"></script>
+    <script src="../js/session.js"></script>
+    <script src="create.js"></script>
 
     <script>
     $(document).ready(function() {
       var session = new Session();
       if (session.session == undefined) {
-        document.location = "login";
+        document.location = "../login";
         return;
       }
 
       $('#username').text(session.username);
       $('#logout').click(function() {
         session.clearSession();
+      });
+
+      loadForms(session);
+
+      $('#form').change(function() {
+        var formId = $(this).val();
+        loadCustomFields(session, formId);
       });
     });
     </script>
