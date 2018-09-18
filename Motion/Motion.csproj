@@ -83,6 +83,8 @@
     <Compile Include="Views\ViewData.cs" />
     <Compile Include="Views\View.cs" />
     <Compile Include="Forms\Field.cs" />
+    <Compile Include="Tickets\TicketFactory.cs" />
+    <Compile Include="Rest\PermissionException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

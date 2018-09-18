@@ -67,6 +67,28 @@ namespace Motion.Tickets
             }
         }
 
+        [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/tickets/create")]
+        public void CreateTicket(HttpListenerContext context)
+        {
+            try
+            {
+                var data = GetRequestPostData(context.Request);
+                var session = ValidateSession(data);
+
+                TicketFactory factory = new TicketFactory(data, session, formData);
+
+
+            }
+            catch (RequestException e)
+            {
+                SendUnexpectedError(context, e.Reason);
+            }
+            catch (InputException e)
+            {
+                SendMissingParameter(context, e.Reason);
+            }
+        }
+
         [RESTRoute(Method = HttpMethod.POST, PathInfo = @"^/api/tickets/edit")]
         public void EditTicket(HttpListenerContext context)
         {

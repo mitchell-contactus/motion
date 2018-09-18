@@ -219,5 +219,21 @@ namespace Motion.Tickets
             Insert(LogEventQuery, Config.Get("mysql_db"), ticketId, session.AccountId, 
                    session.UserId, (int) eventType, E(eventDetail));
         }
+
+        const string CreateTicketQuery = 
+        @"INSERT INTO
+        {0}.tt_tickets
+        ({1})
+        VALUES
+        ({2})";
+        public void CreateTicket(Session session, TicketFactory ticketFactory)
+        {
+            int? ticketId = InsertReturnId(CreateTicketQuery, Config.Get("mysql_db"), 
+                   ticketFactory.BuildInsertString(), ticketFactory.BuildValuesString());
+            if (ticketId != null)
+            {
+                LogEvent(session, (int) ticketId, TICKET_EVENT.CREATED, "");
+            }
+        }
     } 
 }
