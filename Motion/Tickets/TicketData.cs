@@ -226,14 +226,31 @@ namespace Motion.Tickets
         ({1})
         VALUES
         ({2})";
-        public void CreateTicket(Session session, TicketFactory ticketFactory)
+        public int? CreateTicket(Session session, TicketFactory ticketFactory)
         {
             int? ticketId = InsertReturnId(CreateTicketQuery, Config.Get("mysql_db"), 
                    ticketFactory.BuildInsertString(), ticketFactory.BuildValuesString());
             if (ticketId != null)
             {
+                foreach (var fieldId in ticketFactory.customFields.Keys)
+                {
+                    InsertCustomField((int)ticketId, -1, fieldId, ticketFactory.customFields[fieldId]);
+                }
+
                 LogEvent(session, (int) ticketId, TICKET_EVENT.CREATED, "");
             }
+            return ticketId;
+        }
+
+        const string InsertCustomFieldQuery = 
+        @"INSERT INTO
+        {0}.tt_ticket_submitted_values
+        (form_id, ticket_id, field_id, field_value)
+        VALUES
+        ({1}, {2}, {3}, ""{4}"")";
+        public void InsertCustomField(int ticketId, int formId, int fieldId, string fieldValue)
+        {
+            Insert(InsertCustomFieldQuery, Config.Get("mysql_db"), formId, ticketId, fieldId, fieldValue);
         }
     } 
 }

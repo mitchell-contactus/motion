@@ -76,8 +76,16 @@ namespace Motion.Tickets
                 var session = ValidateSession(data);
 
                 TicketFactory factory = new TicketFactory(data, session, formData);
+                int? ticketId = ticketData.CreateTicket(session, factory);
 
-
+                if (ticketId != null)
+                {
+                    SendTextResponse(context, ticketId.ToString());
+                }
+                else
+                {
+                    throw new RequestException("Ticket creation failed");
+                }
             }
             catch (RequestException e)
             {
